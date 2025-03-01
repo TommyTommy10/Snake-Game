@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Snake Game</title>
+    <title>Snake Game Avanzato</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -75,7 +75,7 @@
     </style>
 </head>
 <body>
-    <h1>Snake Game</h1>
+    <h1>Snake Game Avanzato</h1>
     
     <div class="game-container">
         <div class="score-panel">
@@ -116,6 +116,9 @@
             let gameInterval;
             let gameSpeed = 150;
             let gameRunning = false;
+            
+            const eatSound = new Audio('path-to-eat-sound.mp3'); // Sostituisci con il percorso del tuo effetto sonoro
+            const gameOverSound = new Audio('path-to-game-over-sound.mp3'); // Sostituisci con il percorso del tuo effetto sonoro
             
             function initGame() {
                 snake = [
@@ -164,6 +167,7 @@
                 if (head.x === food.x && head.y === food.y) {
                     score += 10;
                     scoreDisplay.textContent = score;
+                    eatSound.play();
                     if (score > highScore) {
                         highScore = score;
                         highScoreDisplay.textContent = highScore;
@@ -214,6 +218,7 @@
             function gameOver() {
                 clearInterval(gameInterval);
                 gameRunning = false;
+                gameOverSound.play();
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.font = '30px Arial';

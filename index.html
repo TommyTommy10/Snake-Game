@@ -72,6 +72,15 @@
             text-align: center;
             color: #555;
         }
+
+        .settings {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .settings label {
+            margin-right: 10px;
+        }
     </style>
 </head>
 <body>
@@ -89,6 +98,15 @@
             <button id="start-btn">Inizia Gioco</button>
             <button id="reset-btn">Ricomincia</button>
         </div>
+
+        <div class="settings">
+            <label for="speed">Velocità:</label>
+            <select id="speed">
+                <option value="150">Normale</option>
+                <option value="100">Veloce</option>
+                <option value="50">Molto Veloce</option>
+            </select>
+        </div>
         
         <div class="instructions">
             <p>Usa le frecce ← ↑ → ↓ della tastiera per muovere il serpente. Mangia il cibo rosso per crescere e aumentare il punteggio. Il gioco finisce se il serpente colpisce se stesso o i bordi.</p>
@@ -103,6 +121,7 @@
             const highScoreDisplay = document.getElementById('high-score');
             const startButton = document.getElementById('start-btn');
             const resetButton = document.getElementById('reset-btn');
+            const speedSelect = document.getElementById('speed');
             
             const gridSize = 20;
             const tileCount = 20;
@@ -111,6 +130,7 @@
             let highScore = localStorage.getItem('snakeHighScore') || 0;
             let snake = [];
             let food = {};
+            let powerUp = {};
             let dx = gridSize;
             let dy = 0;
             let gameInterval;
@@ -129,6 +149,7 @@
                 dx = gridSize;
                 dy = 0;
                 generateFood();
+                generatePowerUp();
                 draw();
             }
             
@@ -140,6 +161,8 @@
                 });
                 ctx.fillStyle = '#FF0000';
                 ctx.fillRect(food.x, food.y, gridSize - 2, gridSize - 2);
+                ctx.fillStyle = '#FFD700'; // Colore per il power-up
+                ctx.fillRect(powerUp.x, powerUp.y, gridSize - 2, gridSize - 2);
             }
             
             function update() {
@@ -163,6 +186,12 @@
                 } else {
                     snake.pop();
                 }
+
+                if (head.x === powerUp.x && head.y === powerUp.y) {
+                    score += 20; // Aggiungi punteggio extra per il power-up
+                    scoreDisplay.textContent = score;
+                    generatePowerUp();
+                }
                 
                 if (checkCollision()) {
                     gameOver();
@@ -178,6 +207,16 @@
                     food.y = Math.floor(Math.random() * tileCount) * gridSize;
                     isOnSnake = snake.some(segment => segment.x === food.x && segment.y === food.y);
                 } while (isOnSnake);
+            }
+
+            function generatePowerUp() {
+                let isOnSnakeOrFood;
+                do {
+                    powerUp.x = Math.floor(Math.random() * tileCount) * gridSize;
+                    powerUp.y = Math.floor(Math.random() * tileCount) * gridSize;
+                    isOnSnakeOrFood = snake.some(segment => segment.x === powerUp.x && segment.y === powerUp.y) || 
+                                      (powerUp.x === food.x && powerUp.y === food.y);
+                } while (isOnSnakeOrFood);
             }
             
             function checkCollision() {
@@ -240,6 +279,7 @@
             
             startButton.addEventListener('click', () => {
                 if (!gameRunning) {
+                    gameSpeed = parseInt(speedSelect.value);
                     initGame();
                     gameRunning = true;
                     gameInterval = setInterval(gameLoop, gameSpeed);

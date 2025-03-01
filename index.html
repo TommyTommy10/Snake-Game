@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -14,7 +13,7 @@
             justify-content: center;
             height: 100vh;
             margin: 0;
-            background-color: #f0f0f0;
+            background: linear-gradient(to bottom, #f0f0f0, #e0e0e0);
         }
         
         h1 {
@@ -98,7 +97,6 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Riferimenti agli elementi
             const canvas = document.getElementById('game-board');
             const ctx = canvas.getContext('2d');
             const scoreDisplay = document.getElementById('score');
@@ -106,147 +104,99 @@
             const startButton = document.getElementById('start-btn');
             const resetButton = document.getElementById('reset-btn');
             
-            // Costanti del gioco
             const gridSize = 20;
             const tileCount = 20;
             
-            // Variabili del gioco
             let score = 0;
             let highScore = localStorage.getItem('snakeHighScore') || 0;
             let snake = [];
             let food = {};
-            let dx = gridSize; // direzione iniziale: destra
+            let dx = gridSize;
             let dy = 0;
             let gameInterval;
-            let gameSpeed = 150; // millisecondi
+            let gameSpeed = 150;
             let gameRunning = false;
             
-            // Inizializza il gioco
             function initGame() {
-                // Posizione iniziale del serpente
                 snake = [
                     {x: 5 * gridSize, y: 10 * gridSize},
                     {x: 4 * gridSize, y: 10 * gridSize},
                     {x: 3 * gridSize, y: 10 * gridSize}
                 ];
-                
-                // Reset punteggio e direzione
                 score = 0;
                 scoreDisplay.textContent = score;
                 highScoreDisplay.textContent = highScore;
                 dx = gridSize;
                 dy = 0;
-                
-                // Genera cibo
                 generateFood();
-                
-                // Disegna lo stato iniziale
                 draw();
             }
             
-            // Disegna tutto
             function draw() {
-                // Pulisci canvas
-                ctx.fillStyle = '#222';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                
-                // Disegna serpente
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
                 snake.forEach((segment, index) => {
-                    // Testa con colore diverso
-                    if (index === 0) {
-                        ctx.fillStyle = '#7CFC00'; // verde acceso per la testa
-                    } else {
-                        ctx.fillStyle = '#4CAF50'; // verde per il corpo
-                    }
+                    ctx.fillStyle = index === 0 ? '#7CFC00' : '#4CAF50';
                     ctx.fillRect(segment.x, segment.y, gridSize - 2, gridSize - 2);
                 });
-                
-                // Disegna cibo
                 ctx.fillStyle = '#FF0000';
                 ctx.fillRect(food.x, food.y, gridSize - 2, gridSize - 2);
             }
             
-            // Aggiorna stato del gioco
             function update() {
-                // Muovi il serpente
                 const head = {x: snake[0].x + dx, y: snake[0].y + dy};
                 snake.unshift(head);
                 
-                // Controlla collisione con il cibo
                 if (head.x === food.x && head.y === food.y) {
-                    // Incrementa punteggio
                     score += 10;
                     scoreDisplay.textContent = score;
-                    
-                    // Aggiorna record se necessario
                     if (score > highScore) {
                         highScore = score;
                         highScoreDisplay.textContent = highScore;
                         localStorage.setItem('snakeHighScore', highScore);
                     }
-                    
-                    // Genera nuovo cibo
                     generateFood();
-                    
-                    // Aumenta velocità ogni 5 cibi
                     if (score % 50 === 0 && gameSpeed > 60) {
                         gameSpeed -= 10;
                         clearInterval(gameInterval);
                         gameInterval = setInterval(gameLoop, gameSpeed);
                     }
                 } else {
-                    // Rimuovi l'ultima parte del serpente (solo se non ha mangiato)
                     snake.pop();
                 }
                 
-                // Controlla collisione con i bordi o con se stesso
                 if (checkCollision()) {
                     gameOver();
                 }
                 
-                // Disegna lo stato corrente
                 draw();
             }
             
-            // Genera cibo in posizione casuale
             function generateFood() {
-                const x = Math.floor(Math.random() * tileCount) * gridSize;
-                const y = Math.floor(Math.random() * tileCount) * gridSize;
-                
-                // Evita di posizionare il cibo sopra il serpente
-                const isOnSnake = snake.some(segment => segment.x === x && segment.y === y);
-                if (isOnSnake) {
-                    generateFood(); // Riprova
-                } else {
-                    food = {x, y};
-                }
+                let isOnSnake;
+                do {
+                    food.x = Math.floor(Math.random() * tileCount) * gridSize;
+                    food.y = Math.floor(Math.random() * tileCount) * gridSize;
+                    isOnSnake = snake.some(segment => segment.x === food.x && segment.y === food.y);
+                } while (isOnSnake);
             }
             
-            // Controlla collisioni
             function checkCollision() {
                 const head = snake[0];
-                
-                // Collisione con i bordi
                 if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height) {
                     return true;
                 }
-                
-                // Collisione con se stesso (dalla seconda parte in poi)
                 for (let i = 1; i < snake.length; i++) {
                     if (head.x === snake[i].x && head.y === snake[i].y) {
                         return true;
                     }
                 }
-                
                 return false;
             }
             
-            // Game loop principale
             function gameLoop() {
                 update();
             }
             
-            // Game over
             function gameOver() {
                 clearInterval(gameInterval);
                 gameRunning = false;
@@ -258,13 +208,11 @@
                 ctx.fillText('Game Over!', canvas.width / 2, canvas.height / 2);
             }
             
-            // Gestione input da tastiera
             document.addEventListener('keydown', (event) => {
                 if (!gameRunning) return;
-                
                 switch(event.key) {
                     case 'ArrowUp':
-                        if (dy === 0) { // Previeni movimento in direzione opposta
+                        if (dy === 0) {
                             dx = 0;
                             dy = -gridSize;
                         }
@@ -290,7 +238,6 @@
                 }
             });
             
-            // Pulsante Start
             startButton.addEventListener('click', () => {
                 if (!gameRunning) {
                     initGame();
@@ -299,14 +246,12 @@
                 }
             });
             
-            // Pulsante Reset
             resetButton.addEventListener('click', () => {
                 clearInterval(gameInterval);
                 initGame();
                 gameRunning = false;
             });
             
-            // Inizializza subito il gioco (senza avviarlo)
             initGame();
         });
     </script>

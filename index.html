@@ -137,7 +137,7 @@
             
             function draw() {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+                
                 snake.forEach((segment, index) => {
                     const gradient = ctx.createLinearGradient(segment.x, segment.y, segment.x + gridSize, segment.y + gridSize);
                     gradient.addColorStop(0, index === 0 ? '#32CD32' : '#4CAF50');
